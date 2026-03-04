@@ -8,7 +8,6 @@ from scoring.scoring_engine import compute_scores
 
 app = FastAPI()
 
-# ---------------- CORS ----------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,7 +16,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------- Load Emotion Model ----------------
 model = None
 
 @app.on_event("startup")
@@ -26,10 +24,6 @@ def startup_event():
     from emotion_model.predict import load_model
     model = load_model()
 
-
-# ---------------------------------------------------
-# 1️⃣ Frame Emotion Prediction
-# ---------------------------------------------------
 @app.post("/predict-frame")
 async def predict_frame(file: UploadFile = File(...)):
 
@@ -41,10 +35,6 @@ async def predict_frame(file: UploadFile = File(...)):
 
     return result
 
-
-# ---------------------------------------------------
-# 2️⃣ Emotion Aggregation
-# ---------------------------------------------------
 @app.post("/aggregate-emotions")
 async def aggregate_emotions(emotions: list[str]):
 
@@ -73,9 +63,6 @@ async def aggregate_emotions(emotions: list[str]):
     }
 
 
-# ---------------------------------------------------
-# 3️⃣ Speech + NLP Analysis
-# ---------------------------------------------------
 @app.post("/analyze-audio")
 async def analyze_audio(file: UploadFile = File(...)):
 
@@ -88,10 +75,6 @@ async def analyze_audio(file: UploadFile = File(...)):
 
     return speech_results
 
-
-# ---------------------------------------------------
-# 4️⃣ Final AI Presentation Score
-# ---------------------------------------------------
 @app.post("/final-analysis")
 async def final_analysis(data: dict):
 
@@ -99,12 +82,14 @@ async def final_analysis(data: dict):
     speech = data.get("speech", {})
 
     words_per_minute = speech.get("words_per_minute", 0)
-    filler_count = speech.get("filler_words", 0)
+    filler_words = speech.get("filler_words", 0)
+    language_score = speech.get("language_score", 0)
 
-    final_scores = compute_scores(
+    result = compute_scores(
         emotion_distribution,
         words_per_minute,
-        filler_count
+        filler_words,
+        language_score
     )
 
-    return final_scores
+    return result

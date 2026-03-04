@@ -1,57 +1,62 @@
-def compute_scores(emotion_distribution, words_per_minute, filler_count):
+def compute_scores(emotion_distribution, words_per_minute, filler_words, language_score):
 
-    # Emotion-based confidence
-    positivity = (
-        emotion_distribution.get("Happy", 0) +
-        emotion_distribution.get("Surprise", 0)
+    positive = emotion_distribution.get("Happy", 0) + emotion_distribution.get("Surprise", 0)
+    negative = (
+        emotion_distribution.get("Sad", 0)
+        + emotion_distribution.get("Angry", 0)
+        + emotion_distribution.get("Fear", 0)
+        + emotion_distribution.get("Disgust", 0)
     )
 
-    negativity = (
-        emotion_distribution.get("Sad", 0) +
-        emotion_distribution.get("Angry", 0) +
-        emotion_distribution.get("Fear", 0) +
-        emotion_distribution.get("Disgust", 0)
-    )
+    emotion_score = max(0, min(100, positive - negative + 50))
 
-    confidence_score = max(0, min(100, positivity - negativity + 50))
 
-    # Speech rate score
-    if 130 <= words_per_minute <= 160:
-        speech_rate_score = 90
-    elif 110 <= words_per_minute <= 180:
-        speech_rate_score = 70
+    if 110 <= words_per_minute <= 150:
+        speed_score = 100
+    elif 90 <= words_per_minute < 110 or 150 < words_per_minute <= 170:
+        speed_score = 75
     else:
-        speech_rate_score = 50
+        speed_score = 50
 
-    # Clarity score (penalize filler words)
-    clarity_score = max(0, 100 - (filler_count * 5))
+    filler_penalty = filler_words * 3
+    speech_score = max(0, speed_score - filler_penalty)
 
-    # Overall score
-    overall_score = round(
-        (confidence_score * 0.4) +
-        (speech_rate_score * 0.3) +
-        (clarity_score * 0.3)
+
+    language_score = max(0, min(100, language_score))
+
+
+    final_score = round(
+        (emotion_score * 0.4) +
+        (speech_score * 0.3) +
+        (language_score * 0.3),
+        2
     )
 
-    # Feedback generation
     feedback = []
 
-    if filler_count > 5:
-        feedback.append("Reduce filler words for clearer delivery.")
+    if emotion_score < 60:
+        feedback.append("Try to maintain more positive facial expressions.")
+
+    if speech_score < 60:
+        feedback.append("Improve speech fluency and reduce filler words.")
+
+    if words_per_minute < 100:
+        feedback.append("Speak slightly faster to maintain audience engagement.")
 
     if words_per_minute > 170:
-        feedback.append("You are speaking too fast.")
+        feedback.append("Slow down your speech for better clarity.")
 
-    if words_per_minute < 120:
-        feedback.append("Try increasing your speaking pace.")
+    if language_score < 70:
+        feedback.append("Use more varied vocabulary in your presentation.")
 
-    if confidence_score > 75:
-        feedback.append("Good positive facial engagement.")
+    if not feedback:
+        feedback.append("Excellent presentation performance.")
+
 
     return {
-        "confidence_score": confidence_score,
-        "speech_rate_score": speech_rate_score,
-        "clarity_score": clarity_score,
-        "overall_score": overall_score,
+        "emotion_score": round(emotion_score, 2),
+        "speech_score": round(speech_score, 2),
+        "language_score": round(language_score, 2),
+        "final_score": final_score,
         "feedback": feedback
     }
