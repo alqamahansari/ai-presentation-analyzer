@@ -1,142 +1,167 @@
 # AI Presentation Performance Analyzer
 
-### A Multimodal AI System for Evaluating Human Presentation Skills
+## Multimodal AI System for Evaluating Human Presentation Skills
 
-An AI-powered system that evaluates presentation performance using
-**Computer Vision**, **Speech Processing**, and **Natural Language
-Processing (NLP)**.
+An **AI-powered presentation evaluation system** that analyzes a speaker’s performance using a **multimodal artificial intelligence approach** combining:
 
-The system captures webcam video and microphone audio during a
-presentation and analyzes:
+- Computer Vision
+- Speech Processing
+- Natural Language Processing (NLP)
 
--   Facial emotions (confidence & engagement)
--   Speech delivery (speed, fluency, filler words)
--   Language quality (vocabulary richness, clarity, sentiment)
+The system captures **webcam video** and **microphone audio** during a presentation and automatically evaluates multiple aspects of communication performance.
 
-The results are combined into an **AI-powered presentation analytics
-dashboard**.
+It analyzes:
 
-------------------------------------------------------------------------
+- **Facial emotions** to measure confidence and engagement
+- **Speech delivery** to evaluate fluency, speaking speed, and filler words
+- **Language quality** to measure vocabulary richness and sentiment
 
-## Features
+All results are integrated into an **AI-driven presentation analytics dashboard** that provides objective feedback on presentation skills.
 
-• Real‑time facial emotion recognition\
-• Speech transcription using Whisper\
-• Words-per-minute analysis\
-• Filler word detection\
-• Vocabulary richness evaluation\
-• Sentiment analysis of speech\
-• Emotion distribution visualization\
-• Confidence score estimation\
-• Speech analytics dashboard
+# Features
 
-------------------------------------------------------------------------
+- Real-time **Facial Emotion Recognition**
+- **Speech-to-Text transcription** using Whisper
+- **Words-per-minute (WPM)** speaking speed analysis
+- **Filler word detection**
+- **Vocabulary richness evaluation**
+- **Sentiment analysis of speech**
+- **Emotion distribution visualization**
+- **Presentation confidence score estimation**
+- **Speech analytics dashboard**
 
-## AI Modules
+# AI Modules
 
-### 1. Emotion Recognition (Computer Vision)
+## 1. Emotion Recognition (Computer Vision)
 
-A convolutional neural network analyzes facial expressions from webcam
-frames to detect emotional states during the presentation.
+A **Convolutional Neural Network (CNN)** processes facial expressions captured from webcam frames to detect emotional states during the presentation.
 
-### 2. Speech Delivery Analysis (Audio AI)
+These emotions are aggregated to estimate the speaker’s **overall presentation confidence**.
 
-Audio is transcribed using Whisper and analyzed to compute: - Speaking
-speed (Words per Minute) - Filler word frequency - Speech fluency
 
-### 3. Language Quality Evaluation (NLP)
+## 2. Speech Delivery Analysis (Audio AI)
 
-Natural Language Processing techniques measure: - Vocabulary richness -
-Sentence complexity - Sentiment of the speech
+Audio from the presentation is transcribed using **OpenAI Whisper**.
 
-### 4. Multimodal Performance Evaluation
+The system evaluates:
 
-Results from the vision, speech, and language modules are combined to
-produce a **presentation confidence score**.
+- **Speaking speed (Words Per Minute)**
+- **Filler word frequency**
+- **Speech fluency**
 
-------------------------------------------------------------------------
+These metrics provide insights into the **clarity and pacing of speech delivery**.
 
-## Tech Stack
 
-### Frontend
+## 3. Language Quality Evaluation (NLP)
 
--   React.js
--   Chart.js
--   Axios
+Natural Language Processing techniques are applied to the transcribed speech to measure linguistic quality through:
 
-### Backend
+- **Vocabulary richness**
+- **Sentence complexity**
+- **Sentiment analysis**
 
--   FastAPI
--   PyTorch
--   OpenAI Whisper
--   NLTK
--   VaderSentiment
+This helps determine how effectively the speaker communicates ideas.
 
-------------------------------------------------------------------------
 
-## Project Structure
+## 4. Multimodal Performance Evaluation
 
-ai-presentation-analyzer │ ├── backend │ ├── app.py │ ├──
-requirements.txt │ ├── emotion_model/ │ ├── audio_module/ │ └── scoring/
-│ ├── frontend │ ├── package.json │ └── src/ │ └── components/ │ ├──
-docs │ └── screenshots/ │ └── README.md
+Outputs from the **vision**, **speech**, and **language** modules are combined to produce a unified metric called the:
 
-------------------------------------------------------------------------
+### Presentation Confidence Score
 
-## System Architecture
+This score reflects the overall effectiveness of the presentation.
 
-Camera + Microphone\
-│\
-▼\
-Data Capture Layer\
-│\
-┌──────┴─────────┐\
-▼ ▼\
-Emotion Model Speech Model\
-(CNN) (Whisper)\
-▼ ▼\
-Emotion Metrics NLP Metrics\
-│\
-▼\
-Multimodal Evaluation Engine\
-│\
-▼\
-AI Presentation Dashboard
 
-------------------------------------------------------------------------
+# Technology Stack
 
-## Example Output
+## Frontend
 
-Emotion Distribution\
-Confidence Score\
-Speech Analysis\
-Language Quality Metrics
+- React.js  
+- Chart.js  
+- Axios  
 
-Example metrics include:
+## Backend
 
--   Words Per Minute
--   Filler Word Count
--   Vocabulary Score
--   Sentiment Score
--   Language Quality Score
+- FastAPI  
+- PyTorch  
+- OpenAI Whisper  
+- NLTK  
+- VaderSentiment  
 
-------------------------------------------------------------------------
 
-## Keywords
+# Project Structure
+```
+ai-presentation-analyzer
+│
+├── backend
+│ ├── app.py
+│ ├── requirements.txt
+│ ├── emotion_model/
+│ ├── audio_module/
+│ └── scoring/
+│
+├── frontend
+│ ├── package.json
+│ └── src/
+│ └── components/
+│
+├── docs
+│
+├── screenshots
+│
+└── README.md
+```
 
-Artificial Intelligence\
-Multimodal AI\
-Computer Vision\
-Speech Analysis\
-Natural Language Processing\
-Presentation Analytics\
-Human Behavior Analysis
+# System Architecture
+```
+Camera + Microphone
+        │
+        ▼
+   Data Capture Layer
+        │
+ ┌──────┴─────────┐
+ ▼                ▼
+Emotion Model   Speech Model
+    (CNN)         (Whisper)
+ ▼                ▼
+Emotion Metrics   NLP Metrics
+        │
+        ▼
+Multimodal Evaluation Engine
+        │
+        ▼
+AI Presentation Analytics Dashboard
+```
 
-------------------------------------------------------------------------
 
-## Author
+# Example Output Metrics
 
-Mohammad Alquamah Ansari\
-B.Sc. Artificial Intelligence
+The system generates several performance indicators, including:
 
-GitHub: https://github.com/alqamahansari
+- Words Per Minute (WPM)
+- Filler Word Count
+- Vocabulary Richness Score
+- Sentiment Score
+- Emotion Distribution
+- Language Quality Score
+- Presentation Confidence Score
+
+These metrics help users understand **strengths and weaknesses in their presentation delivery**.
+
+# Keywords
+
+Artificial Intelligence  
+Multimodal AI  
+Computer Vision  
+Speech Analysis  
+Natural Language Processing  
+Presentation Analytics  
+Human Behavior Analysis  
+
+# Author
+
+**Mohammad Alquamah Ansari**  
+B.Sc. Artificial Intelligence  
+
+GitHub:  
+https://github.com/alqamahansari

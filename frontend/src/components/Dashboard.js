@@ -4,56 +4,34 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const Card = ({ children }) => (
+const Card = ({ title, children }) => (
   <div
     style={{
-      backgroundColor: "#1e293b",
-      padding: "16px",
+      background: "#F3F4F6",
+      border: "1px solid #D1D5DB",
       borderRadius: "10px",
-      border: "1px solid #243041",
+      padding: "20px",
+      height: "100%"
     }}
   >
+    <h3
+      style={{
+        marginBottom: "15px",
+        fontSize: "16px",
+        color: "#111827"
+      }}
+    >
+      {title}
+    </h3>
+
     {children}
   </div>
 );
 
-const Skeleton = ({ title }) => (
-  <Card>
-    <h3 style={{ marginBottom: "10px", fontSize: "16px" }}>{title}</h3>
-    <div
-      style={{
-        height: "12px",
-        backgroundColor: "#334155",
-        borderRadius: "6px",
-        marginBottom: "8px",
-      }}
-    />
-    <div
-      style={{
-        height: "12px",
-        width: "70%",
-        backgroundColor: "#334155",
-        borderRadius: "6px",
-      }}
-    />
-  </Card>
-);
+export default function Dashboard({ analytics }) {
 
-const Dashboard = ({ analytics }) => {
-  const hasData =
-    analytics &&
-    analytics.distribution &&
-    Object.keys(analytics.distribution).length > 0;
-
-  if (!hasData) {
-    return (
-      <>
-        <Skeleton title="Emotion Distribution" />
-        <Skeleton title="Confidence Score" />
-        <Skeleton title="Speech Analysis" />
-        <Skeleton title="Language Quality" />
-      </>
-    );
+  if (!analytics) {
+    return <p>Loading results...</p>;
   }
 
   const { distribution, confidence_score, speech } = analytics;
@@ -61,164 +39,109 @@ const Dashboard = ({ analytics }) => {
   const labels = Object.keys(distribution);
   const values = Object.values(distribution);
 
-  const topEmotion = labels.reduce((a, b) =>
-    distribution[a] > distribution[b] ? a : b
-  );
-
-  const scoreColor =
-    confidence_score > 75
-      ? "#22c55e"
-      : confidence_score > 55
-      ? "#facc15"
-      : "#ef4444";
-
   const data = {
     labels,
     datasets: [
       {
         data: values,
         backgroundColor: [
-          "#60a5fa",
-          "#f87171",
-          "#fbbf24",
-          "#34d399",
-          "#a78bfa",
-          "#fb923c",
-          "#94a3b8",
-        ],
-        borderWidth: 1,
-      },
-    ],
+          "#2563EB",
+          "#22C55E",
+          "#F59E0B",
+          "#EF4444",
+          "#8B5CF6",
+          "#06B6D4"
+        ]
+      }
+    ]
   };
 
-  // Speech metrics
-  const speechWPM = speech?.words_per_minute ?? "-";
-  const fillerWords = speech?.filler_words ?? "-";
-  const clarity = speech?.clarity_score ?? "-";
-  const sentiment = speech?.sentiment_score ?? 0;
-
-  const sentimentLabel =
-    sentiment > 0.2
-      ? "Positive"
-      : sentiment < -0.2
-      ? "Negative"
-      : "Neutral";
-
-  // Language metrics
-  const vocabulary = speech?.vocabulary_score ?? "-";
-  const grammarErrors = speech?.grammar_errors ?? "-";
-  const sentenceLength = speech?.avg_sentence_length ?? "-";
-  const strongWords = speech?.strong_words ?? "-";
-  const languageScore = speech?.language_score ?? "-";
-
-  const languageColor =
-    languageScore > 75
-      ? "#22c55e"
-      : languageScore > 55
-      ? "#facc15"
-      : "#ef4444";
-
   return (
-    <>
-      {/* Emotion Distribution */}
-      <Card>
-        <h3 style={{ marginBottom: "10px", fontSize: "16px" }}>
-          Emotion Distribution
-        </h3>
+    <div
+      style={{
+        maxWidth: "1000px",
+        margin: "auto",
+        padding: "40px",
+        fontFamily: "Inter, system-ui"
+      }}
+    >
 
-        <div style={{ maxWidth: "260px", margin: "0 auto" }}>
-          <Pie data={data} />
-        </div>
-      </Card>
+      {/* Title */}
+
+      <h1
+        style={{
+          textAlign: "center",
+          marginBottom: "35px",
+          color: "#111827"
+        }}
+      >
+        Interview Analysis Report
+      </h1>
 
       {/* Confidence Score */}
-      <Card>
-        <h3 style={{ marginBottom: "8px", fontSize: "16px" }}>
-          Confidence Score
-        </h3>
 
-        <h1
+      <Card title="Confidence Score">
+
+        <div
           style={{
-            fontSize: "28px",
-            margin: "4px 0 10px 0",
+            fontSize: "40px",
             fontWeight: "600",
-            color: scoreColor,
+            textAlign: "center",
+            color: "#2563EB"
           }}
         >
           {confidence_score}%
-        </h1>
+        </div>
 
-        <p style={{ fontSize: "13px", marginBottom: "4px" }}>
-          <strong>Dominant Emotion:</strong> {topEmotion}
-        </p>
-
-        <p style={{ fontSize: "13px", color: "#94a3b8" }}>
-          {confidence_score > 75
-            ? "Strong Performance"
-            : confidence_score > 55
-            ? "Moderate Performance"
-            : "Needs Improvement"}
-        </p>
       </Card>
 
-      {/* Speech Analysis */}
-      <Card>
-        <h3 style={{ marginBottom: "10px", fontSize: "16px" }}>
-          Speech Analysis
-        </h3>
+      {/* Middle Grid */}
 
-        <p style={{ fontSize: "13px", marginBottom: "6px" }}>
-          <strong>Words / Minute:</strong> {speechWPM}
-        </p>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "20px",
+          marginTop: "20px"
+        }}
+      >
 
-        <p style={{ fontSize: "13px", marginBottom: "6px" }}>
-          <strong>Filler Words:</strong> {fillerWords}
-        </p>
+        {/* Emotion Chart */}
 
-        <p style={{ fontSize: "13px", marginBottom: "6px" }}>
-          <strong>Clarity Score:</strong> {clarity}%
-        </p>
+        <Card title="Emotion Distribution">
 
-        <p style={{ fontSize: "13px", color: "#94a3b8" }}>
-          <strong>Sentiment:</strong> {sentimentLabel}
-        </p>
-      </Card>
+          <Pie data={data} />
+
+        </Card>
+
+        {/* Speech Analysis */}
+
+        <Card title="Speech Analysis">
+
+          <p><strong>Words / Minute:</strong> {speech?.words_per_minute}</p>
+          <p><strong>Filler Words:</strong> {speech?.filler_words}</p>
+          <p><strong>Clarity Score:</strong> {speech?.clarity_score}%</p>
+          <p><strong>Sentiment:</strong> {speech?.sentiment_score}</p>
+
+        </Card>
+
+      </div>
 
       {/* Language Quality */}
-      <Card>
-        <h3 style={{ marginBottom: "8px", fontSize: "16px" }}>
-          Language Quality
-        </h3>
 
-        <h1
-          style={{
-            fontSize: "26px",
-            margin: "4px 0 10px 0",
-            fontWeight: "600",
-            color: languageColor,
-          }}
-        >
-          {languageScore}%
-        </h1>
+      <div style={{ marginTop: "20px" }}>
 
-        <p style={{ fontSize: "13px", marginBottom: "5px" }}>
-          <strong>Vocabulary Score:</strong> {vocabulary}%
-        </p>
+        <Card title="Language Quality">
 
-        <p style={{ fontSize: "13px", marginBottom: "5px" }}>
-          <strong>Grammar Errors:</strong> {grammarErrors}
-        </p>
+          <p><strong>Vocabulary Score:</strong> {speech?.vocabulary_score}%</p>
+          <p><strong>Grammar Errors:</strong> {speech?.grammar_errors}</p>
+          <p><strong>Sentence Length:</strong> {speech?.avg_sentence_length}</p>
+          <p><strong>Strong Words Used:</strong> {speech?.strong_words}</p>
 
-        <p style={{ fontSize: "13px", marginBottom: "5px" }}>
-          <strong>Sentence Length:</strong> {sentenceLength}
-        </p>
+        </Card>
 
-        <p style={{ fontSize: "13px", color: "#94a3b8" }}>
-          <strong>Strong Words Used:</strong> {strongWords}
-        </p>
-      </Card>
-    </>
+      </div>
+
+    </div>
   );
-};
-
-export default Dashboard;
+}
