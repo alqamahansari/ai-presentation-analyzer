@@ -1,12 +1,18 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
+import os
 from collections import Counter
 
 from audio_module.audio_nlp import analyze_speech
 from scoring.scoring_engine import compute_scores
 
 app = FastAPI()
+
+
+# -----------------------------
+# CORS CONFIG
+# -----------------------------
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,27 +22,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# -----------------------------
+# LOAD EMOTION MODEL
+# -----------------------------
+
 model = None
 
 @app.on_event("startup")
 def startup_event():
     global model
     from emotion_model.predict import load_model
+    print("Loading emotion model...")
     model = load_model()
+    print("Emotion model loaded.")
+
+
+# -----------------------------
+# EMOTION PREDICTION
+# -----------------------------
 
 @app.post("/predict-frame")
 async def predict_frame(file: UploadFile = File(...)):
 
-    with open("temp.jpg", "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    temp_image = "temp.jpg"
 
-    from emotion_model.predict import predict_emotion
-    result = predict_emotion("temp.jpg", model)
+    try:
 
-    return result
+        with open(temp_image, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        from emotion_model.predict import predict_emotion
+        result = predict_emotion(temp_image, model)
+
+        return result
+
+    finally:
+        if os.path.exists(temp_image):
+            os.remove(temp_image)
+
+
+# -----------------------------
+# EMOTION AGGREGATION
+# -----------------------------
 
 @app.post("/aggregate-emotions")
 async def aggregate_emotions(emotions: list[str]):
+
+    if not emotions:
+        return {
+            "distribution": {},
+            "confidence_score": 0
+        }
 
     counts = Counter(emotions)
     total = sum(counts.values())
@@ -63,17 +100,32 @@ async def aggregate_emotions(emotions: list[str]):
     }
 
 
+# -----------------------------
+# AUDIO ANALYSIS
+# -----------------------------
+
 @app.post("/analyze-audio")
 async def analyze_audio(file: UploadFile = File(...)):
 
     audio_path = "temp_audio.wav"
 
-    with open(audio_path, "wb") as f:
-        f.write(await file.read())
+    try:
 
-    speech_results = analyze_speech(audio_path)
+        with open(audio_path, "wb") as f:
+            f.write(await file.read())
 
-    return speech_results
+        speech_results = analyze_speech(audio_path)
+
+        return speech_results
+
+    finally:
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+
+
+# -----------------------------
+# FINAL AI SCORING
+# -----------------------------
 
 @app.post("/final-analysis")
 async def final_analysis(data: dict):
@@ -95,7 +147,13 @@ async def final_analysis(data: dict):
     return result
 
 
+# -----------------------------
+# CONNECTION TEST
+# -----------------------------
+
 @app.get("/test-connection")
 def test_connection():
     print("Frontend connected successfully")
-    return {"message": "Backend working"}
+    return {
+        "message": "Backend working"
+    }

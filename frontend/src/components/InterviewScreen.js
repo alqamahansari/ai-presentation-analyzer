@@ -5,8 +5,9 @@ import questions from "../data/questions";
 export default function InterviewScreen({ finishInterview }) {
 
   const [index, setIndex] = useState(0);
-  const [analytics, setAnalytics] = useState(null);
+  const [analytics, setAnalytics] = useState({ answers: [] });
   const [stopSignal, setStopSignal] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const QUESTION_TIME = 60;
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
@@ -21,6 +22,8 @@ export default function InterviewScreen({ finishInterview }) {
 
   useEffect(() => {
 
+    if (submitted) return;
+
     if (timeLeft === 0) {
       nextQuestion();
       return;
@@ -32,20 +35,26 @@ export default function InterviewScreen({ finishInterview }) {
 
     return () => clearTimeout(timer);
 
-  }, [timeLeft, index]);
+  }, [timeLeft, index, submitted]);
+
 
 
   // -----------------------------
-  // WAIT FOR ANALYTICS RESULT
+  // WAIT FOR FINAL ANALYTICS
   // -----------------------------
 
   useEffect(() => {
 
-    if (stopSignal && analytics) {
+    if (stopSignal && analytics?.speech) {
+
+      console.log("Interview completed");
+
       finishInterview(analytics);
+
     }
 
-  }, [analytics]);
+  }, [analytics, stopSignal, finishInterview]);
+
 
 
   // -----------------------------
@@ -56,17 +65,26 @@ export default function InterviewScreen({ finishInterview }) {
 
     if (lastQuestion) {
 
-      // Stop recording
-      setStopSignal(true);
+      if (!submitted) {
+
+        console.log("Submit Interview clicked");
+
+        setSubmitted(true);
+
+        setStopSignal(true);
+
+      }
 
     } else {
 
-      setIndex(index + 1);
+      setIndex(prev => prev + 1);
+
       setTimeLeft(QUESTION_TIME);
 
     }
 
   };
+
 
 
   // -----------------------------
@@ -83,6 +101,7 @@ export default function InterviewScreen({ finishInterview }) {
       .padStart(2, "0")}`;
 
   };
+
 
 
   // -----------------------------
@@ -134,6 +153,7 @@ export default function InterviewScreen({ finishInterview }) {
         </div>
 
 
+
         {/* Question Header */}
 
         <div
@@ -156,6 +176,7 @@ export default function InterviewScreen({ finishInterview }) {
         </div>
 
 
+
         {/* Question */}
 
         <h2
@@ -169,12 +190,16 @@ export default function InterviewScreen({ finishInterview }) {
         </h2>
 
 
+
         {/* Recorder */}
 
         <Recorder
+          key={index}
+          question={questions[index]}
           setAnalytics={setAnalytics}
           stopSignal={stopSignal}
         />
+
 
 
         {/* Button */}
@@ -189,6 +214,7 @@ export default function InterviewScreen({ finishInterview }) {
 
           <button
             onClick={nextQuestion}
+            disabled={submitted}
             style={{
               padding: "14px 36px",
               borderRadius: "8px",
@@ -196,7 +222,8 @@ export default function InterviewScreen({ finishInterview }) {
               backgroundColor: lastQuestion ? "#EF4444" : "#2563EB",
               color: "white",
               fontSize: "16px",
-              cursor: "pointer"
+              cursor: submitted ? "not-allowed" : "pointer",
+              opacity: submitted ? 0.7 : 1
             }}
           >
             {lastQuestion ? "Submit Interview" : "Next Question"}

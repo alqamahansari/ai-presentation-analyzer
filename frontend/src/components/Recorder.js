@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
 
-const Recorder = ({ setAnalytics, stopSignal }) => {
+const Recorder = ({ question, setAnalytics, stopSignal }) => {
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -27,9 +27,12 @@ const Recorder = ({ setAnalytics, stopSignal }) => {
       .padStart(2, "0")}`;
   };
 
-  // ---------------- START CAMERA + AUDIO ----------------
+  // -----------------------------
+  // START CAMERA + AUDIO
+  // -----------------------------
 
   const startMedia = async () => {
+
     try {
 
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -44,6 +47,7 @@ const Recorder = ({ setAnalytics, stopSignal }) => {
       }
 
       mediaRecorderRef.current = new MediaRecorder(stream);
+
       audioChunksRef.current = [];
 
       mediaRecorderRef.current.ondataavailable = (event) => {
@@ -55,20 +59,24 @@ const Recorder = ({ setAnalytics, stopSignal }) => {
       mediaRecorderRef.current.start();
 
     } catch (error) {
+
       console.error("Camera/Mic permission error:", error);
+
     }
   };
 
-  // ---------------- STOP CAMERA ----------------
+  // -----------------------------
+  // STOP CAMERA
+  // -----------------------------
 
   const stopMedia = () => {
 
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => {
-        track.stop();
-      });
+
+      streamRef.current.getTracks().forEach(track => track.stop());
 
       streamRef.current = null;
+
     }
 
     if (videoRef.current) {
@@ -76,18 +84,26 @@ const Recorder = ({ setAnalytics, stopSignal }) => {
     }
   };
 
-  // ---------------- START RECORDING ----------------
+  // -----------------------------
+  // START RECORDING
+  // -----------------------------
 
   const startRecording = async () => {
 
     sessionEmotionsRef.current = [];
+
+    stoppedRef.current = false;
+
     setSecondsElapsed(0);
 
     await startMedia();
 
+    // Emotion detection every second
+
     intervalRef.current = setInterval(async () => {
 
       if (!videoRef.current || !canvasRef.current) return;
+
       if (videoRef.current.readyState !== 4) return;
 
       const context = canvasRef.current.getContext("2d");
@@ -101,6 +117,7 @@ const Recorder = ({ setAnalytics, stopSignal }) => {
         try {
 
           const formData = new FormData();
+
           formData.append("file", blob);
 
           const response = await axios.post(
@@ -109,36 +126,50 @@ const Recorder = ({ setAnalytics, stopSignal }) => {
           );
 
           const emotion = response.data.emotion;
+
           sessionEmotionsRef.current.push(emotion);
 
         } catch (error) {
+
           console.error("Emotion detection error:", error);
+
         }
 
       });
 
     }, 1000);
 
+    // Timer
+
     timerRef.current = setInterval(() => {
+
       setSecondsElapsed(prev => prev + 1);
+
     }, 1000);
   };
 
-  // ---------------- STOP RECORDING ----------------
+  // -----------------------------
+  // STOP RECORDING
+  // -----------------------------
 
   const stopRecording = () => {
 
     if (stoppedRef.current) return;
+
     stoppedRef.current = true;
 
     clearInterval(intervalRef.current);
+
     clearInterval(timerRef.current);
 
     const recorder = mediaRecorderRef.current;
 
     if (!recorder) {
+
       stopMedia();
+
       return;
+
     }
 
     recorder.onstop = async () => {
@@ -150,72 +181,118 @@ const Recorder = ({ setAnalytics, stopSignal }) => {
         });
 
         const formData = new FormData();
+
         formData.append("file", audioBlob, "interview.webm");
 
-        console.log("Sending audio for speech analysis");
+        // Speech analysis
 
         const speechResponse = await axios.post(
           `${API_URL}/analyze-audio`,
           formData
         );
 
-        console.log("Speech result:", speechResponse.data);
-
-        console.log("Sending emotions:", sessionEmotionsRef.current);
+        // Emotion aggregation
 
         const emotionResponse = await axios.post(
           `${API_URL}/aggregate-emotions`,
           sessionEmotionsRef.current
         );
 
-        console.log("Emotion result:", emotionResponse.data);
+        const result = {
 
-        const finalAnalytics = {
-          ...emotionResponse.data,
-          speech: speechResponse.data
+          question: question,
+
+          transcript: speechResponse.data.transcript,
+
+          speech: speechResponse.data,
+
+          emotions: emotionResponse.data
+
         };
 
-        setAnalytics(finalAnalytics);
+        setAnalytics(prev => {
+
+          if (!prev) {
+            prev = { answers: [] };
+          }
+
+        return {
+
+    distribution: emotionResponse.data.distribution,
+    confidence_score: emotionResponse.data.confidence_score,
+
+    speech: speechResponse.data,
+
+    answers: [
+      ...prev.answers,
+      result
+    ]
+
+  };
+
+});
 
       } catch (error) {
+
         console.error("Final analysis error:", error);
+
       }
 
-      // 🔴 CAMERA + MIC FINALLY STOP HERE
       stopMedia();
+
     };
 
     if (recorder.state !== "inactive") {
+
       recorder.stop();
+
     }
   };
 
-  // ---------------- AUTO START ----------------
+  // -----------------------------
+  // AUTO START
+  // -----------------------------
 
   useEffect(() => {
+
     startRecording();
+
   }, []);
 
-  // ---------------- STOP WHEN SUBMITTED ----------------
+  // -----------------------------
+  // STOP WHEN SUBMITTED
+  // -----------------------------
 
   useEffect(() => {
+
     if (stopSignal === true) {
-      console.log("Stopping interview recording...");
+
       stopRecording();
+
     }
+
   }, [stopSignal]);
 
-  // ---------------- CLEANUP ----------------
+  // -----------------------------
+  // CLEANUP
+  // -----------------------------
 
   useEffect(() => {
+
     return () => {
+
       stopMedia();
+
       clearInterval(intervalRef.current);
+
       clearInterval(timerRef.current);
+
     };
+
   }, []);
 
   return (
+
     <div style={{ width: "100%" }}>
 
       <div
@@ -241,7 +318,7 @@ const Recorder = ({ setAnalytics, stopSignal }) => {
           }}
         />
 
-        {/* Recording indicator */}
+        {/* Recording Indicator */}
 
         <div
           style={{

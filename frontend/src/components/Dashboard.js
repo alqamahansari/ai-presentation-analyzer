@@ -5,7 +5,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 
-/* Improved Card Component */
+/* Card Component */
 
 const Card = ({ title, children }) => (
   <div
@@ -16,8 +16,7 @@ const Card = ({ title, children }) => (
       padding: "16px",
       color: "#374151",
       height: "100%",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-      transition: "all 0.2s ease"
+      boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
     }}
   >
     <div
@@ -42,10 +41,10 @@ export default function Dashboard({ analytics }) {
 
   if (!analytics) return <p>Loading...</p>;
 
-  const { distribution, confidence_score, speech } = analytics;
+  const { distribution, confidence_score, speech, answers } = analytics;
 
-  const labels = Object.keys(distribution);
-  const values = Object.values(distribution);
+  const labels = Object.keys(distribution || {});
+  const values = Object.values(distribution || {});
 
   const data = {
     labels,
@@ -74,7 +73,7 @@ export default function Dashboard({ analytics }) {
       }}
     >
 
-      {/* Title */}
+      {/* TITLE */}
 
       <h1
         style={{
@@ -88,7 +87,7 @@ export default function Dashboard({ analytics }) {
       </h1>
 
 
-      {/* GRID */}
+      {/* MAIN GRID */}
 
       <div
         style={{
@@ -98,7 +97,7 @@ export default function Dashboard({ analytics }) {
         }}
       >
 
-        {/* Confidence */}
+        {/* CONFIDENCE */}
 
         <Card title="Confidence Score">
 
@@ -124,7 +123,7 @@ export default function Dashboard({ analytics }) {
         </Card>
 
 
-        {/* Speech */}
+        {/* SPEECH */}
 
         <Card title="Speech Analysis">
 
@@ -136,7 +135,7 @@ export default function Dashboard({ analytics }) {
         </Card>
 
 
-        {/* Emotion */}
+        {/* EMOTIONS */}
 
         <Card title="Emotion Distribution">
 
@@ -201,7 +200,7 @@ export default function Dashboard({ analytics }) {
         </Card>
 
 
-        {/* Language */}
+        {/* LANGUAGE */}
 
         <Card title="Language Quality">
 
@@ -209,6 +208,64 @@ export default function Dashboard({ analytics }) {
           <p><strong>Grammar Errors:</strong> {speech?.grammar_errors}</p>
           <p><strong>Sentence Length:</strong> {speech?.avg_sentence_length}</p>
           <p><strong>Strong Words Used:</strong> {speech?.strong_words}</p>
+
+        </Card>
+
+      </div>
+
+
+      {/* QUESTION-WISE TRANSCRIPTS */}
+
+      <div style={{ marginTop: "16px" }}>
+
+        <Card title="Interview Transcripts">
+
+          <div
+            style={{
+              maxHeight: "180px",
+              overflowY: "auto",
+              fontSize: "14px"
+            }}
+          >
+
+            {answers && answers.length > 0 ? (
+
+              answers.map((item, index) => (
+
+                <div
+                  key={index}
+                  style={{
+                    marginBottom: "12px",
+                    paddingBottom: "8px",
+                    borderBottom: "1px solid #E5E7EB"
+                  }}
+                >
+
+                  <div
+                    style={{
+                      fontWeight: "600",
+                      color: "#111827",
+                      marginBottom: "4px"
+                    }}
+                  >
+                    Q{index + 1}: {item.question}
+                  </div>
+
+                  <div style={{ color: "#374151" }}>
+                    {item.transcript}
+                  </div>
+
+                </div>
+
+              ))
+
+            ) : (
+
+              <p>No transcript available.</p>
+
+            )}
+
+          </div>
 
         </Card>
 
