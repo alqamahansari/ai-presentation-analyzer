@@ -10,7 +10,7 @@ from nltk.stem import WordNetLemmatizer
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # Load models
-model = whisper.load_model("base")
+model = whisper.load_model("tiny")
 sentiment_analyzer = SentimentIntensityAnalyzer()
 lemmatizer = WordNetLemmatizer()
 
